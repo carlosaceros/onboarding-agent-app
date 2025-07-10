@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.sqlite3
+*.db
+
+# Virtual environment
+venv/
+
+# Environment variables
+.env
+
+# Google Credentials (sensitive)
+google_credentials/
+
+# Streamlit secrets (local copy, sensitive)
+.streamlit/secrets.toml

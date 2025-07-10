@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototipo: Sistema de Onboarding Inteligente - Mantis FICC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chat-bubble-agent {
+            background-color: #e5e7eb; /* gray-200 */
+            color: #1f2937; /* gray-800 */
+            border-bottom-left-radius: 0;
+        }
+        .chat-bubble-user {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+            border-bottom-right-radius: 0;
+        }
+        .chat-bubble-system {
+            background-color: #fefce8; /* yellow-50 */
+            color: #a16207; /* yellow-700 */
+            border: 1px solid #fde047; /* yellow-300 */
+            font-size: 0.875rem;
+        }
+        #chat-window {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="flex flex-col md:flex-row h-screen">
+        <!-- Columna Principal de Interacción -->
+        <main class="w-full md:w-2/3 lg:w-3/4 p-4 md:p-6 flex flex-col">
+            <header class="mb-4">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Sistema de Onboarding Inteligente</h1>
+                <p id="onboarding-status" class="text-md text-gray-600">Cargando...</p>
+            </header>
+            
+            <!-- Ventana de Chat -->
+            <div id="chat-window" class="flex-1 bg-white rounded-lg shadow-md p-4 overflow-y-auto mb-4">
+                <!-- Los mensajes del chat se insertarán aquí -->
+            </div>
+
+            <!-- Área de Input -->
+            <div id="input-area" class="bg-white rounded-lg shadow-md p-4">
+                 <form id="chat-form" class="flex items-center space-x-4">
+                    <input type="text" id="user-input" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Escribe tu respuesta aquí..." autocomplete="off">
+                    <button type="submit" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                        Enviar
+                    </button>
+                </form>
+                <div id="system-controls" class="mt-4 text-center">
+                    <button id="reset-button" class="text-sm text-gray-500 hover:text-red-600">Reiniciar Progreso</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Columna del Dashboard -->
+        <aside class="w-full md:w-1/3 lg:w-1/4 bg-gray-50 p-4 md:p-6 border-l border-gray-200 overflow-y-auto">
+            <h2 class="text-xl font-bold mb-4 text-gray-900">Dashboard de Progreso</h2>
+            
+            <!-- Métricas Clave -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-white p-3 rounded-lg shadow">
+                    <p class="text-sm text-gray-500">Progreso General</p>
+                    <p id="metric-progress" class="text-2xl font-semibold">0%</p>
+                </div>
+                <div class="bg-white p-3 rounded-lg shadow">
+                    <p class="text-sm text-gray-500">Día Actual</p>
+                    <p id="metric-day" class="text-2xl font-semibold">1 / 5</p>
+                </div>
+            </div>
+
+            <!-- Gráfico de Competencias -->
+            <div class="bg-white p-4 rounded-lg shadow mb-6">
+                <h3 class="font-semibold mb-2">Mapa de Competencias</h3>
+                <canvas id="competency-chart"></canvas>
+            </div>
+
+            <!-- Progreso de RAEs -->
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h3 class="font-semibold mb-2">Estado de RAEs</h3>
+                <div id="rae-progress-list" class="space-y-2 max-h-60 overflow-y-auto">
+                    <!-- Lista de RAEs se generará aquí -->
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Módulos de JavaScript -->
+    <script type="module" src="main.js"></script>
+    <script type="module">
+        // Este es un truco para que los módulos funcionen en este entorno de prototipo.
+        // En una aplicación real, estos serían archivos separados.
+        
+        // ========= DATABASE MODULE (database.js) =========
+        const DB = {
+            RAE_LIBRARY: {
+                // Día 1: Cultura
+                'RAE1': { stage: 'cultura', description: 'Explica en 3 frases por qué Mantis FICC existe.', keywords: ['democratizar', 'gestión', 'pymes', 'herramientas'] },
+                'RAE2': { stage: 'cultura', description: 'Identifica 2 valores empresariales en situaciones comerciales.', keywords: ['innovación', 'cercanía', 'excelencia', 'cliente'] },
+                'RAE3': { stage: 'cultura', description: 'Describe cómo su rol impacta directamente en la misión.', keywords: ['impacta', 'misión', 'ayudar', 'crecer'] },
+                // Día 2: Organización
+                'RAE4': { stage: 'organizacion', description: 'Identifica a quién escalar una objeción técnica compleja.', keywords: ['técnica', 'gerencia', 'desarrollo', 'soporte'] },
+                'RAE5': { stage: 'organizacion', description: 'Describe el flujo correcto para entregar un cliente nuevo.', keywords: ['implementación', 'transición', 'handoff'] },
+                'RAE6': { stage: 'organizacion', description: 'Lista 3 departamentos que impactan su éxito comercial.', keywords: ['marketing', 'implementación', 'soporte', 'producto'] },
+                // Días 3-4: Procesos
+                'RAE7': { stage: 'procesos', description: 'Clasifica 10 leads ficticios correctamente.', keywords: ['clasifica', 'lead', 'correcto'] },
+                'RAE8': { stage: 'procesos', description: 'Identifica información faltante crítica en un lead.', keywords: ['falta', 'información', 'crítica'] },
+                'RAE9': { stage: 'procesos', description: 'Conduce entrevista de descubrimiento completa.', keywords: ['entrevista', 'descubrimiento', 'pain points'] },
+                'RAE10': { stage: 'procesos', description: 'Identifica 3 pain points del cliente.', keywords: ['dolor', 'necesidad', 'problema'] },
+                'RAE11': { stage: 'procesos', description: 'Agenda demo considerando todos los stakeholders.', keywords: ['agenda', 'demo', 'stakeholders'] },
+                'RAE12': { stage: 'procesos', description: 'Maneja 5 objeciones post-demo efectivamente.', keywords: ['objeción', 'manejar', 'respuesta'] },
+                'RAE13': { stage: 'procesos', description: 'Elabora cotización técnicamente correcta.', keywords: ['cotización', 'propuesta', 'correcta'] },
+                'RAE14': { stage: 'procesos', description: 'Personaliza propuesta según diagnóstico.', keywords: ['personaliza', 'diagnóstico', 'necesidades'] },
+                'RAE15': { stage: 'procesos', description: 'Negocia condiciones manteniendo rentabilidad.', keywords: ['negocia', 'rentabilidad', 'cierre'] },
+                'RAE16': { stage: 'procesos', description: 'Identifica señales de compra del cliente.', keywords: ['señal', 'compra', 'interés'] },
+                'RAE17': { stage: 'procesos', description: 'Entrega completa sin pérdida de información.', keywords: ['entrega', 'completa', 'implementación'] },
+                'RAE18': { stage: 'procesos', description: 'Coordina expectativas cliente-implementación.', keywords: ['expectativas', 'coordina', 'cliente'] },
+            },
+            ONBOARDING_PLAN: [
+                { day: 1, stage: 'cultura', agent: 'CultureGuide', title: 'Inmersión Cultural', raes: ['RAE1', 'RAE2', 'RAE3'], checkpoint: 80 },
+                { day: 2, stage: 'organizacion', agent: 'OrgNavigator', title: 'Navegación Organizacional', raes: ['RAE4', 'RAE5', 'RAE6'], checkpoint: 90 },
+                { day: 3, stage: 'procesos', agent: 'ProcessMaster', title: 'Dominio de Procesos (Parte 1)', raes: ['RAE7', 'RAE8', 'RAE9', 'RAE10', 'RAE11', 'RAE12'], checkpoint: 85 },
+                { day: 4, stage: 'procesos', agent: 'ProcessMaster', title: 'Dominio de Procesos (Parte 2)', raes: ['RAE13', 'RAE14', 'RAE15', 'RAE16', 'RAE17', 'RAE18'], checkpoint: 85 },
+                { day: 5, stage: 'certificacion', agent: 'AssessmentBot', title: 'Certificación Integral', raes: [], checkpoint: 85 },
+            ],
+            USER_ID: 'pyme_exec_01',
+        };
+
+        class ProgressTracker {
+            constructor(userId) {
+                this.userId = userId;
+                this.storageKey = `onboarding_progress_${this.userId}`;
+            }
+
+            getProgress() {
+                const data = localStorage.getItem(this.storageKey);
+                return data ? JSON.parse(data) : null;
+            }
+
+            saveProgress(progress) {
+                localStorage.setItem(this.storageKey, JSON.stringify(progress));
+            }
+
+            resetProgress() {
+                localStorage.removeItem(this.storageKey);
+            }
+
+            initProgress() {
+                const raeScores = {};
+                Object.keys(DB.RAE_LIBRARY).forEach(raeId => {
+                    raeScores[raeId] = { status: 'pendiente', attempts: 0 };
+                });
+
+                const newProgress = {
+                    userId: this.userId,
+                    currentDay: 1,
+                    currentStageIndex: 0,
+                    currentRaeIndex: 0,
+                    completed: false,
+                    raeScores: raeScores,
+                };
+                this.saveProgress(newProgress);
+                return newProgress;
+            }
+        }
+        
+        window.db = {
+            ...DB,
+            tracker: new ProgressTracker(DB.USER_ID)
+        };
+
+
+        // ========= UI MODULE (ui.js) =========
+        class UIManager {
+            constructor() {
+                this.chatWindow = document.getElementById('chat-window');
+                this.userInput = document.getElementById('user-input');
+                this.onboardingStatus = document.getElementById('onboarding-status');
+                this.metricProgress = document.getElementById('metric-progress');
+                this.metricDay = document.getElementById('metric-day');
+                this.raeProgressList = document.getElementById('rae-progress-list');
+                this.competencyChart = null;
+            }
+
+            _createBubble(content, type) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('p-3', 'rounded-lg', 'max-w-xl', 'mb-2', 'shadow-sm');
+                bubble.innerHTML = content; // Usamos innerHTML para permitir formato
+                
+                switch(type) {
+                    case 'agent':
+                        bubble.classList.add('chat-bubble-agent', 'self-start');
+                        break;
+                    case 'user':
+                        bubble.classList.add('chat-bubble-user', 'self-end');
+                        break;
+                    case 'system':
+                         bubble.classList.add('chat-bubble-system', 'self-center', 'w-full', 'text-center');
+                        break;
+                }
+                return bubble;
+            }
+
+            addMessage(content, type) {
+                const messageWrapper = document.createElement('div');
+                messageWrapper.classList.add('flex', 'flex-col', 'w-full');
+
+                const bubble = this._createBubble(content, type);
+                messageWrapper.appendChild(bubble);
+                
+                this.chatWindow.appendChild(messageWrapper);
+                this.chatWindow.scrollTop = this.chatWindow.scrollHeight;
+            }
+
+            updateDashboard(progress) {
+                // Métricas
+                const totalRaes = Object.keys(window.db.RAE_LIBRARY).length;
+                const completedRaes = Object.values(progress.raeScores).filter(r => r.status === 'aprobado').length;
+                const progressPercentage = totalRaes > 0 ? Math.round((completedRaes / totalRaes) * 100) : 0;
+                
+                this.metricProgress.textContent = `${progressPercentage}%`;
+                this.metricDay.textContent = `${progress.currentDay} / 5`;
+
+                // Status Header
+                const currentStageInfo = window.db.ONBOARDING_PLAN[progress.currentStageIndex];
+                this.onboardingStatus.textContent = `Día ${progress.currentDay}: ${currentStageInfo.title}`;
+
+                // Lista de RAEs
+                this.raeProgressList.innerHTML = '';
+                Object.entries(progress.raeScores).forEach(([raeId, data]) => {
+                    const raeInfo = window.db.RAE_LIBRARY[raeId];
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between text-sm';
+                    
+                    let icon = '';
+                    if (data.status === 'aprobado') {
+                        icon = '<svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
+                    } else if (data.status === 'fallido') {
+                        icon = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
+                    } else {
+                        icon = '<svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9 13a1 1 0 112 0v1a1 1 0 11-2 0v-1zm1-9a1 1 0 00-1 1v4a1 1 0 102 0V5a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>';
+                    }
+
+                    div.innerHTML = `
+                        <span class="font-medium">${raeId}</span>
+                        <span>${icon}</span>
+                    `;
+                    this.raeProgressList.appendChild(div);
+                });
+
+                // Gráfico
+                this.updateChart(progress);
+            }
+            
+            updateChart(progress) {
+                const stages = ['cultura', 'organizacion', 'procesos'];
+                const data = stages.map(stage => {
+                    const stageRaes = Object.keys(window.db.RAE_LIBRARY).filter(id => window.db.RAE_LIBRARY[id].stage === stage);
+                    if (stageRaes.length === 0) return 0;
+                    const approvedRaes = stageRaes.filter(id => progress.raeScores[id].status === 'aprobado').length;
+                    return Math.round((approvedRaes / stageRaes.length) * 100);
+                });
+
+                if (!this.competencyChart) {
+                    const ctx = document.getElementById('competency-chart').getContext('2d');
+                    this.competencyChart = new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: ['Cultura', 'Organización', 'Procesos'],
+                            datasets: [{
+                                label: 'Competencia',
+                                data: data,
+                                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                                borderColor: 'rgba(59, 130, 246, 1)',
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                r: {
+                                    angleLines: { display: true },
+                                    suggestedMin: 0,
+                                    suggestedMax: 100,
+                                    pointLabels: { font: { size: 14 } }
+                                }
+                            },
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+                } else {
+                    this.competencyChart.data.datasets[0].data = data;
+                    this.competencyChart.update();
+                }
+            }
+
+            clearInput() {
+                this.userInput.value = '';
+            }
+        }
+        window.ui = new UIManager();
+
+
+        // ========= AGENTS MODULE (agents.js) =========
+        class AgentController {
+            
+            _validateRae(userInput, raeId) {
+                const raeInfo = window.db.RAE_LIBRARY[raeId];
+                if (!raeInfo.keywords) return true; // Simulación simple, si no hay keywords, se aprueba
+
+                const cleanedInput = userInput.toLowerCase();
+                const keywordsFound = raeInfo.keywords.filter(kw => cleanedInput.includes(kw));
+                
+                // Para este prototipo, consideramos aprobado si encuentra al menos la mitad de las keywords
+                return keywordsFound.length >= raeInfo.keywords.length / 2;
+            }
+
+            getResponse(progress, userInput) {
+                const stageInfo = window.db.ONBOARDING_PLAN[progress.currentStageIndex];
+                const raeId = stageInfo.raes[progress.currentRaeIndex];
+                
+                if (!raeId) { // Etapa sin RAEs como la certificación
+                    return {
+                        newMessage: `¡Felicidades! Has completado todo el onboarding. Ahora tendrás una reunión con tu supervisor para finalizar.`,
+                        progressUpdate: { completed: true }
+                    };
+                }
+
+                const isValid = this._validateRae(userInput, raeId);
+                let newMessage = '';
+                let progressUpdate = { ...progress };
+                progressUpdate.raeScores[raeId].attempts += 1;
+
+                if (isValid) {
+                    progressUpdate.raeScores[raeId].status = 'aprobado';
+                    newMessage = `✅ ¡Excelente! Respuesta correcta para ${raeId}. Has dominado este concepto.`;
+                    
+                    // Avanzar al siguiente RAE
+                    progressUpdate.currentRaeIndex += 1;
+
+                    // ¿Hemos terminado los RAEs de esta etapa?
+                    if (progressUpdate.currentRaeIndex >= stageInfo.raes.length) {
+                        newMessage += `<br><br>🎉 ¡Has completado todos los objetivos de la etapa de <strong>${stageInfo.title}</strong>!`;
+                        
+                        // Avanzar a la siguiente etapa
+                        progressUpdate.currentStageIndex += 1;
+                        progressUpdate.currentRaeIndex = 0;
+
+                        if (progressUpdate.currentStageIndex >= window.db.ONBOARDING_PLAN.length) {
+                            progressUpdate.completed = true;
+                            newMessage += `<br><br>🏆 <strong>¡FELICITACIONES!</strong> Has completado todo el programa de onboarding.`;
+                        } else {
+                            const nextStageInfo = window.db.ONBOARDING_PLAN[progressUpdate.currentStageIndex];
+                            progressUpdate.currentDay = nextStageInfo.day;
+                            newMessage += `<br><br>Mañana comenzarás con el <strong>Día ${nextStageInfo.day}: ${nextStageInfo.title}</strong>. ¡Prepárate!`;
+                        }
+                    }
+
+                } else {
+                    progressUpdate.raeScores[raeId].status = 'fallido';
+                    newMessage = `Hmm, esa no es exactamente la respuesta que buscábamos para ${raeId}. Intenta de nuevo. Recuerda enfocarte en: ${window.db.RAE_LIBRARY[raeId].keywords.join(', ')}.`;
+                }
+
+                return { newMessage, progressUpdate };
+            }
+
+            getInitialMessage(progress) {
+                if (progress.completed) {
+                    return "¡Felicidades! Has completado tu onboarding.";
+                }
+                const stageInfo = window.db.ONBOARDING_PLAN[progress.currentStageIndex];
+                const raeId = stageInfo.raes[progress.currentRaeIndex];
+                const raeInfo = window.db.RAE_LIBRARY[raeId];
+
+                if (progress.currentRaeIndex === 0 && Object.values(progress.raeScores).every(r => r.status === 'pendiente')) {
+                     return `¡Bienvenido/a al sistema de onboarding de Mantis FICC! Soy <strong>${stageInfo.agent}</strong>, tu guía para la etapa de <strong>${stageInfo.title}</strong>. <br><br>Comencemos con tu primer objetivo: ${raeInfo.description}`;
+                }
+                
+                return `Continuemos. Tu siguiente objetivo es: <strong>${raeInfo.description}</strong>`;
+            }
+        }
+        window.agents = new AgentController();
+    </script>
+    <script type="module" id="main-script">
+        // ========= MAIN MODULE (main.js) =========
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatForm = document.getElementById('chat-form');
+            const resetButton = document.getElementById('reset-button');
+
+            let progress = window.db.tracker.getProgress();
+
+            function startApp() {
+                progress = window.db.tracker.getProgress();
+                if (!progress) {
+                    progress = window.db.tracker.initProgress();
+                    window.ui.addMessage("Iniciando un nuevo proceso de onboarding...", "system");
+                }
+                
+                window.ui.updateDashboard(progress);
+                const initialMessage = window.agents.getInitialMessage(progress);
+                window.ui.addMessage(initialMessage, 'agent');
+            }
+
+            chatForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const userInput = window.ui.userInput.value.trim();
+                if (userInput === '' || progress.completed) return;
+
+                window.ui.addMessage(userInput, 'user');
+                window.ui.clearInput();
+                
+                // Simular un pequeño delay del agente
+                setTimeout(() => {
+                    const response = window.agents.getResponse(progress, userInput);
+                    progress = response.progressUpdate;
+                    window.db.tracker.saveProgress(progress);
+                    
+                    window.ui.addMessage(response.newMessage, 'agent');
+                    window.ui.updateDashboard(progress);
+
+                    // Si no se ha completado la etapa, preguntar por el siguiente RAE
+                    if (!progress.completed && response.progressUpdate.raeScores[Object.keys(response.progressUpdate.raeScores).find(k => response.progressUpdate.raeScores[k].status === 'aprobado')]) {
+                        const nextQuestion = window.agents.getInitialMessage(progress);
+                         setTimeout(() => {
+                            window.ui.addMessage(nextQuestion, 'agent');
+                        }, 1000);
+                    }
+
+                }, 500);
+            });
+            
+            resetButton.addEventListener('click', () => {
+                if (confirm('¿Estás seguro de que quieres reiniciar todo tu progreso? Esta acción no se puede deshacer.')) {
+                    window.db.tracker.resetProgress();
+                    window.ui.chatWindow.innerHTML = '';
+                    startApp();
+                }
+            });
+
+            startApp();
+        });
+    </script>
+</body>
+</html>
