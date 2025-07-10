@@ -9,7 +9,7 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 
 # Si modificas estos alcances, elimina el archivo token.json.
-SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
+SCOPES = ["https://www.googleapis.com/auth/drive"]
 
 # --- CONFIGURACIÓN ---
 # ID de la carpeta en Google Drive que contiene los materiales de onboarding.
