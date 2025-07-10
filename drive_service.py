@@ -56,7 +56,7 @@ class DriveService:
         # This flow is primarily for local development and initial token generation.
         # On Streamlit Cloud, credentials should come from st.secrets.
         if "google_credentials" in st.secrets:
-            client_config = st.secrets["google_credentials"].to_dict()
+            client_config = {"installed": st.secrets["google_credentials"].to_dict()}
         else:
             # Fallback for local development if credentials.json exists
             if os.path.exists('google_credentials/credentials.json'):
