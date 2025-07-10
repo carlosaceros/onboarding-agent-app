@@ -6,6 +6,7 @@ from agents import CultureGuide, OrgNavigator, ProcessMaster, AssessmentBot
 from dashboard import create_competency_spider_chart, get_rae_status_list
 import os
 import tempfile
+import json
 
 # --- CONFIGURACIÓN DE LA PÁGINA ---
 st.set_page_config(layout="wide", page_title="Onboarding Inteligente - Mantis FICC")
