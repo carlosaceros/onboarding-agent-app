@@ -79,6 +79,54 @@ class CultureGuide(BaseAgent):
         Si el empleado falla un RAE, proporciona retroalimentación específica y re-enseña el concepto.
         """
 
+    def get_full_commercial_process(self):
+        """Devuelve una explicación completa del proceso comercial basada en el documento PDF."""
+        explanation = """
+¡Excelente pregunta! Para ser un Asesor Comercial de alto impacto en Mantis FICC, es crucial dominar el proceso completo. Aquí te presento una guía ordenada basada en nuestra documentación interna:
+
+### 1. Información General y Objetivo del Proceso
+*   **Nombre del Proceso:** Ejecutiva Comercial Pymes.
+*   **Responsable:** El área Comercial - Ventas.
+*   **Objetivo Principal:** Gestionar y convertir oportunidades comerciales, desde el primer contacto hasta el cierre, para contribuir al crecimiento de nuestra base de clientes PYMES.
+
+### 2. Aportes a la Organización y Alcance
+Tu rol es vital. No solo generas ingresos, sino que también:
+*   **Fortaleces la marca** y la relación con el cliente.
+*   **Aportas retroalimentación estratégica** a las áreas de producto y soporte.
+*   **Colaboras estrechamente** con Marketing, Desarrollo, Implementación y Gerencia para asegurar una estrategia coherente.
+
+### 3. Entradas del Proceso (Lo que necesitas para empezar)
+*   **Fuentes de Datos:** Leads de redes sociales, nuestra web, WhatsApp, y bases de datos de prospectos en GEVI y Excel.
+*   **Personas Involucradas:** Trabajarás con Gerentes, Marketing, Soporte, Desarrollo y el área administrativa.
+
+### 4. Actividades / Descripción del Flujo (Tu día a día)
+Este es el corazón de tu trabajo, dividido en 9 pasos clave:
+1.  **Recepción y Calificación de Leads:** Recibir y analizar los contactos iniciales.
+2.  **Registro y Segmentación:** Ingresar y clasificar los leads en GEVI/Excel.
+3.  **Contacto Inicial y Diagnóstico:** Llamar o enviar un mensaje para entender las necesidades del cliente.
+4.  **Agendamiento de la DEMO:** Coordinar una demostración del software.
+5.  **Seguimiento Post-DEMO:** Validar el interés y resolver dudas.
+6.  **Elaboración de Propuesta Comercial:** Crear y enviar una cotización formal.
+7.  **Negociación y Cierre:** Manejar objeciones y firmar el contrato.
+8.  **Transición a Administración:** Entregar la información para la facturación.
+9.  **Transición a Implementación:** Entregar la información al equipo técnico para la instalación.
+
+### 5. Salidas del Proceso (Lo que produces)
+*   **Documentos:** Cotizaciones, propuestas personalizadas, contratos.
+*   **Sistemas:** Mantener actualizado el software GEVI y las plataformas de comunicación.
+
+### 6. Indicadores de Desempeño (Cómo medimos el éxito)
+*   **Ventas y Crecimiento:** Volumen de ventas, tasa de crecimiento.
+*   **Eficiencia y Productividad:** Tiempo del ciclo de ventas, tasa de conversión.
+*   **Satisfacción del Cliente:** Índice de satisfacción y tasa de retención.
+*   **Rentabilidad:** Retorno de la inversión (ROI) y costo por transacción.
+
+Dominar este proceso de principio a fin es tu camino al éxito.
+
+¿Hay algo más que te gustaría aclarar sobre este proceso? O, si prefieres, podemos continuar con la pregunta del RAE.
+"""
+        return explanation
+
     def get_welcome_message(self, user_name):
         """Genera un mensaje de bienvenida detallado y contextual para el usuario."""
         company_name = "Mantis FICC"

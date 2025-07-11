@@ -215,6 +215,11 @@ Cuando estés listo/a para el siguiente bloque de información, dímelo.'''
         return response_text
 
     if st.session_state.rae_sub_stage == 'waiting_for_confirmation':
+        # --- Detección de intención para el paso a paso ---
+        step_by_step_keywords = ["paso a paso", "proceso comercial", "guía completa", "explicación del proceso"]
+        if any(keyword in user_prompt.lower() for keyword in step_by_step_keywords):
+            return culture_guide.get_full_commercial_process()
+
         affirmative_responses = ['sí', 'si', 'listo', 'lista', 'dale', 'ok', 'vale', 'adelante', 'comencemos']
         if any(word in user_prompt.lower() for word in affirmative_responses):
             response_text = f"""¡Perfecto! Aquí va la pregunta:
