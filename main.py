@@ -150,15 +150,11 @@ def process_user_input(user_prompt, tracker, assessment_bot, culture_guide, org_
                 rae_to_teach_info = RAE_LIBRARY_DATA.get(current_rae_to_teach_id)
                 if rae_to_teach_info:
                     instructional_content = rae_to_teach_info.get('instructional_content', 'No hay contenido de enseñanza para este objetivo.')
-                    response_text = (
-                        f"**Contenido para {current_rae_to_teach_info['stage'].capitalize()} - {current_rae_to_teach_id}:**
+                    response_text = f'''**Contenido para {current_rae_to_teach_info['stage'].capitalize()} - {current_rae_to_teach_id}:**
 
-"
-                        f"{instructional_content}
+{instructional_content}
 
-"
-                        f"Cuando estés listo/a para el siguiente bloque de información, dímelo."
-                    )
+Cuando estés listo/a para el siguiente bloque de información, dímelo.'''
                     st.session_state.rae_sub_stage = 'waiting_for_next_instruction'
                     return response_text
                 else:
