@@ -15,3 +15,4 @@ google_credentials/
 
 # Streamlit secrets (local copy, sensitive)
 .streamlit/secrets.toml
+new_token.txt
