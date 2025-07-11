@@ -29,6 +29,23 @@ class BaseAgent:
             print(f"Error al generar respuesta de Gemini: {e}")
             return "Lo siento, estoy teniendo problemas para procesar tu solicitud en este momento."
 
+    def answer_question_about_content(self, content, question):
+        """Responde a una pregunta del usuario basándose en un contenido dado."""
+        prompt = f"""
+        Basado en el siguiente contenido, responde a la pregunta del usuario. Si la respuesta no está explícitamente en el contenido, indica que no puedes responderla con la información proporcionada.
+
+        CONTENIDO:
+        ---
+        {content}
+        ---
+
+        PREGUNTA DEL USUARIO:
+        {question}
+
+        RESPUESTA:
+        """
+        return self.generate_response(prompt)
+
 # --- AGENTES ESPECÍFICOS ---
 
 class CultureGuide(BaseAgent):
