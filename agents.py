@@ -32,17 +32,22 @@ class BaseAgent:
     def answer_question_about_content(self, content, question):
         """Responde a una pregunta del usuario basándose en un contenido dado."""
         prompt = f"""
-        Basado en el siguiente contenido, responde a la pregunta del usuario. Si la respuesta no está explícitamente en el contenido, indica que no puedes responderla con la información proporcionada.
+        Eres un asistente de onboarding. Tu tarea es responder a la pregunta del usuario basándose **únicamente** en el contenido proporcionado.
 
-        CONTENIDO:
+        **Instrucciones:**
+        1.  Analiza la "PREGUNTA DEL USUARIO" y el "CONTENIDO" a continuación.
+        2.  Si la respuesta se encuentra explícitamente en el contenido, respóndela de manera clara y concisa.
+        3.  Si la respuesta **no se encuentra** en el contenido, debes responder exactamente con la siguiente frase: "No puedo responder a esa pregunta con la información que tengo. Para temas no cubiertos en este material, te recomiendo consultarlo con tu superior directo, el Gerente Comercial."
+
+        **CONTENIDO:**
         ---
         {content}
         ---
 
-        PREGUNTA DEL USUARIO:
+        **PREGUNTA DEL USUARIO:**
         {question}
 
-        RESPUESTA:
+        **RESPUESTA:**
         """
         return self.generate_response(prompt)
 
