@@ -202,9 +202,7 @@ Cuando estés listo/a para el siguiente bloque de información, dímelo.'''
 > **{rae_info['description']}**'''
                 return response_text
             else:
-                return f"No hay problema, {user_name}. Avísame cuando estés listo/a para comenzar la evaluación de la etapa de {current_stage.capitalize()}.
-
-"
+                return f"No hay problema, {user_name}. Avísame cuando estés listo/a para comenzar la evaluación de la etapa de {current_stage.capitalize()}." # Corregido f-string y añadido comentario.
 
     # --- Lógica original para cuando el modo instruccional NO está activo ---
     if not rae_info:
