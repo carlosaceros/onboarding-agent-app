@@ -139,12 +139,15 @@ def process_user_input(user_prompt, tracker, assessment_bot, culture_guide, org_
             response_text = f"¡Perfecto! Aquí va la pregunta:\n\n> **{rae_info['description']}**"
             st.session_state.rae_sub_stage = 'assessing'
         else:
+            # Si no es una respuesta afirmativa, intentar responder la pregunta sobre el contenido
+            instructional_content = rae_info.get('instructional_content', '')
+            ai_response_to_question = culture_guide.answer_question_about_content(instructional_content, user_prompt)
+            
             response_text = (
-                f"No hay problema, {user_name}. Tómate tu tiempo. Aquí tienes la información de nuevo:\n\n"
-                f"{rae_info.get('instructional_content', '')}\n\n"
-                f"Recuerda que también puedes buscar el recurso recomendado: **{rae_info['remediation_strategy']}**.\n\n"
-                f"Avísame cuando estés listo/a."
+                f"{ai_response_to_question}\n\n"
+                f"¿Hay algo más en el material que te gustaría que te aclare, {user_name}? O, ¿estás listo/a para la pregunta del RAE?"
             )
+            # Mantener el sub-estado como 'waiting_for_confirmation' para permitir más preguntas o la confirmación.
         return response_text
 
     if st.session_state.rae_sub_stage == 'assessing':
