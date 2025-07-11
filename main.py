@@ -179,12 +179,9 @@ Cuando estés listo/a para el siguiente bloque de información, dímelo.'''
                 if rae_to_teach_info:
                     instructional_content = rae_to_teach_info.get('instructional_content', '')
                     ai_response_to_question = culture_guide.answer_question_about_content(instructional_content, user_prompt)
-                    response_text = (
-                        f"{ai_response_to_question}
+                    response_text = f'''{ai_response_to_question}
 
-"
-                        f"¿Hay algo más en este bloque que te gustaría que te aclare, {user_name}? O, ¿estás listo/a para el siguiente?"
-                    )
+¿Hay algo más en este bloque que te gustaría que te aclare, {user_name}? O, ¿estás listo/a para el siguiente?'''
                     return response_text
                 else:
                     return "No pude encontrar el contenido para aclarar tu pregunta. Por favor, dime si estás listo/a para el siguiente bloque."
