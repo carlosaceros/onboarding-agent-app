@@ -217,9 +217,9 @@ Cuando estés listo/a para el siguiente bloque de información, dímelo.'''
     if st.session_state.rae_sub_stage == 'waiting_for_confirmation':
         affirmative_responses = ['sí', 'si', 'listo', 'lista', 'dale', 'ok', 'vale', 'adelante', 'comencemos']
         if any(word in user_prompt.lower() for word in affirmative_responses):
-            response_text = f"¡Perfecto! Aquí va la pregunta:
+            response_text = f"""¡Perfecto! Aquí va la pregunta:
 
-> **{rae_info['description']}**"
+> **{rae_info['description']}**"""
             st.session_state.rae_sub_stage = 'assessing'
         else:
             # Si no es una respuesta afirmativa, intentar responder la pregunta sobre el contenido
