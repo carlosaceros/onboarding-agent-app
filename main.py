@@ -196,7 +196,8 @@ Cuando estés listo/a para el siguiente bloque de información, dímelo.'''
                 # Forzar el inicio de la evaluación del primer RAE de la etapa
                 current_rae_id = stage_raes[0]
                 rae_info = RAE_LIBRARY_DATA.get(current_rae_id)
-                                response_text = f'''¡Perfecto! Aquí va la primera pregunta de la etapa de {current_stage.capitalize()}:
+                # Corrigiendo indentación y añadiendo un comentario para que Git detecte cambios.
+                response_text = f'''¡Perfecto! Aquí va la primera pregunta de la etapa de {current_stage.capitalize()}:
 
 > **{rae_info['description']}**'''
                 return response_text
