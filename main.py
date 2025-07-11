@@ -210,12 +210,7 @@ Cuando estés listo/a para el siguiente bloque de información, dímelo.'''
 
     if st.session_state.rae_sub_stage == 'teaching':
         instructional_content = rae_info.get('instructional_content', 'No hay contenido de enseñanza para este objetivo.')
-        response_text = (
-            f"{instructional_content}
-
-"
-            f"He compartido contigo la información clave. Avísame cuando estés listo/a para la pregunta."
-        )
+        response_text = (            f"{instructional_content}" # Corregido f-string y añadido comentario.            f"\n\nHe compartido contigo la información clave. Avísame cuando estés listo/a para la pregunta."        )
         st.session_state.rae_sub_stage = 'waiting_for_confirmation'
         return response_text
 
