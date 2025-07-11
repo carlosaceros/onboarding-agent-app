@@ -7,6 +7,7 @@ from dashboard import create_competency_spider_chart, get_rae_status_list
 import os
 import tempfile
 import json
+import uuid
 
 # --- CONFIGURACIÓN DE LA PÁGINA ---
 st.set_page_config(layout="wide", page_title="Onboarding Inteligente - Mantis FICC")
@@ -57,7 +58,7 @@ assessment_bot = agents['evaluacion']()
 def init_session_state():
     """Inicializa el estado de la sesión de Streamlit."""
     if 'user_id' not in st.session_state:
-        st.session_state.user_id = "ejecutiva_pymes_01"
+        st.session_state.user_id = str(uuid.uuid4())
         st.session_state.user_name = None
         st.session_state.onboarding_stage = 'name_collection'
     
