@@ -1,7 +1,7 @@
 
 import streamlit as st
 from drive_service import DriveService, ONBOARDING_FOLDER_ID
-from database import setup_database, ProgressTracker, RAE_LIBRARY_DATA, ONBOARDING_PLAN_DATA
+from database import setup_database, ProgressTracker, RAE_LIBRARY_DATA, ONBOARDING_PLAN_DATA, KNOWLEDGE_DOCUMENT_CONTENT
 from agents import CultureGuide, OrgNavigator, ProcessMaster, AssessmentBot
 from dashboard import create_competency_spider_chart, get_rae_status_list
 import os
@@ -150,7 +150,7 @@ def process_user_input(user_prompt, tracker, assessment_bot, culture_guide, org_
                 rae_to_teach_info = RAE_LIBRARY_DATA.get(current_rae_to_teach_id)
                 if rae_to_teach_info:
                     instructional_content = rae_to_teach_info.get('instructional_content', 'No hay contenido de enseñanza para este objetivo.')
-                    response_text = f'''**Contenido para {current_rae_to_teach_info['stage'].capitalize()} - {current_rae_to_teach_id}:**
+                    response_text = f'''**Contenido para {rae_to_teach_info['stage'].capitalize()} - {current_rae_to_teach_id}:**
 
 {instructional_content}
 
@@ -227,9 +227,8 @@ Cuando estés listo/a para el siguiente bloque de información, dímelo.'''
 > **{rae_info['description']}**"""
             st.session_state.rae_sub_stage = 'assessing'
         else:
-            # Si no es una respuesta afirmativa, intentar responder la pregunta sobre el contenido
-            instructional_content = rae_info.get('instructional_content', '')
-            ai_response_to_question = culture_guide.answer_question_about_content(instructional_content, user_prompt)
+            # Si no es una respuesta afirmativa, usar el documento de conocimiento para responder
+            ai_response_to_question = culture_guide.answer_question_about_content(KNOWLEDGE_DOCUMENT_CONTENT, user_prompt)
             
             response_text = f"""{ai_response_to_question}
 

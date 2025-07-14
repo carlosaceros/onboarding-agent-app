@@ -1,410 +1,242 @@
+
+
 import sqlite3
 import json
 
-DB_NAME = "users_progress.db"
+# --- CONTENIDO DEL DOCUMENTO DE GESTIÓN DEL CONOCIMIENTO ---
+KNOWLEDGE_DOCUMENT_CONTENT = """
+Plantilla de Documentación de Proceso: Gestión del Conocimiento
 
+1. Información general del proceso
+- Nombre del proceso: Ejecutiva Comercial Pymes
+- Código / ID del proceso: ACEP-003
+- Versión: Vers.-001
+- Fecha de creación / actualización: 8/07/2025
+- Responsable del proceso: Silvia Fernanda Niño Dávila
+- Área responsable: Comercial – Ventas.
+
+2. Objetivo
+Gestionar y convertir en oportunidades comerciales los contactos obtenidos a través de redes sociales y otros canales, mediante el análisis de sus necesidades, seguimiento efectivo, presentación del software Mantis FICC ERP y cierre de ventas, contribuyendo al crecimiento de la base de clientes PYMES de la empresa.
+
+APORTES A LA ORGANIZACION
+- Generación constante de nuevas oportunidades de negocio, aumentando la base de clientes.
+- Contribución directa al crecimiento de los ingresos a través de procesos comerciales estructurados.
+- Fortalecimiento de la relación con el cliente, promoviendo fidelización y reputación de marca.
+- Alineación entre las necesidades del mercado Pyme y las soluciones ofrecidas por el ERP.
+- Aporte estratégico mediante la retroalimentación del mercado a las áreas de producto y soporte.
+- Representación estratégica del portafolio Mantis FICC ERP, generando confianza y credibilidad en el proceso de venta.
+- Identificación y canalización de oportunidades de mejora del producto basadas en la experiencia del cliente.
+- Apoyo directo en la expansión de la marca en mercados locales y regionales.
+
+3. Alcance
+Realizar análisis de las necesidades de los clientes y ofrecer soluciones personalizadas que se adapten a sus requerimientos.
+Establecer y mantener relaciones con los clientes, asegurando su satisfacción y fidelidad.
+Trabajar en estrecha colaboración con el equipo de desarrollo para entender las características y beneficios del software ERP y poder promocionarlo de manera efectiva.
+Realizar seguimiento de las oportunidades de venta, analizar los resultados y presentar informes a la gerencia para ajustar la estrategia comercial.
+
+1. Departamento de Marketing
+- Alineación con campañas publicitarias y contenido digital.
+- Informe mensual de resultados de Marketing.
+
+2. Departamento Comercial
+- Prospección, seguimiento y cierre de ventas.
+- Negociación en precios, descuentos y metas comerciales.
+- Generación de informes de ventas y análisis de resultados.
+
+3. Gerencia Comercial - Ventas
+- Contribuye con información estratégica para la toma de decisiones.
+- Participa en reuniones de análisis de resultados y planificación.
+- Representa la voz del cliente ante la alta dirección.
+
+4. Departamento de Implementación / Soporte
+- Coordinación para el inicio de proyectos con clientes nuevos.
+- Transmisión clara de los compromisos comerciales y funcionalidades adquiridas.
+
+5. Departamento de Desarrollo / Producto
+- Comunicación de necesidades específicas del mercado Pyme.
+- Reporte de funcionalidades solicitadas por los clientes.
+
+4. Entradas del proceso
+1. Fuentes de datos
+- Base de datos de prospectos y clientes (GEVI y Excel).
+- Base de datos empresas de Gestión Comercial (GEVI y Excel)
+- Leads generados desde redes sociales o página web.
+- Registros de interacción con clientes (WhatsApp, correo, llamadas).
+- Estadísticas de campañas de marketing digital.
+
+2. Personas involucradas
+- Gerente Comercial o Gerente de Ventas.
+- Equipo de Marketing.
+- Equipo de Implementación y Soporte Técnico.
+- Equipo de Desarrollo/Producto (para retroalimentación).
+- Departamento administrativo (para coordinar contratos, facturación, Check List).
+- Aliados comerciales o canales de distribución.
+
+5. Actividades / Descripción del flujo
+Paso | Descripción de la Actividad | Responsable | Herramientas / Sistema
+--- | --- | --- | ---
+1 | Recepción y calificación de leads: Recibe contactos desde redes sociales, WhatsApp, web, referidos u otros canales. | Marketing | WhatsApp Business, Email, Meta/Instagram, Página web, Google, Facebook, YouTube.
+2 | Registro y segmentación del lead: Se ingresa la información del contacto en GEVI o base de datos, clasificándolo por sector, interés, canal de origen, etc. | Ejecutiva Comercial Pyme | GEVI, Excel
+3 | Contacto inicial y diagnóstico: Llamada o mensaje para entender las necesidades del cliente, el tipo de empresa, procesos actuales y motivación de compra. | Ejecutiva Comercial Pyme | Teléfono, WhatsApp, GEVI
+4 | Agendamiento de demostración (DEMO): Se coordina fecha y hora con el equipo técnico o el cliente para mostrar el software. | Ejecutiva Comercial Pyme | Calendario Google, WhatsApp, GEVI
+5 | Seguimiento posterior a la DEMO: Se consulta percepción del cliente, dudas adicionales, y se valida el interés de continuar con propuesta. | Ejecutiva Comercial Pyme | Calendario Google, WhatsApp, GEVI
+6 | Elaboración y envío de propuesta comercial: Cotización formal con alcance, módulos, precios, condiciones de pago, soporte y capacitación. | Ejecutiva Comercial Pyme | Plantilla de cotización, Word/PDF, GEVI
+7 | Negociación y cierre: Se responden objeciones, se negocia precio o condiciones. Una vez aceptada la propuesta, se coordina la firma del contrato. | Ejecutiva Comercial Pyme | WhatsApp, Email, GEVI, Firma Contrato. transferencia
+8 | Entrega y transición al equipo Administrativo y Contable: Se entrega la información del cliente al área de facturación y contable para la realización de la factura y el pago respectivo etc. | Ejecutiva Comercial Pyme | WhatsApp
+9 | Entrega y transición al equipo de implementación: Se entrega la información del cliente al área técnica o de soporte para agendar la instalación y capacitación. | Ejecutiva Comercial Pyme | WhatsApp
+
+6. Salidas del proceso
+1. Documentos
+- Cotizaciones (PDF).
+- Propuestas comerciales personalizadas.
+- Contrato de servicio de software.
+- Brochures o catálogos de módulos.
+- Presentaciones institucionales o comerciales (PowerPoint).
+- Modelos de correo y mensajes WhatsApp.
+- Plantillas de seguimiento a clientes (Excel y GEVI).
+- Informe de gestión comercial mensual.
+- Formato de levantamiento de toma de datos.
+
+2. Herramientas o sistemas
+- Software GEVI
+- Plataformas de correo y WhatsApp Business.
+- ERP Mantis FICC (para demostraciones en vivo).
+- Plataformas de video llamada Meet.
+- Herramientas de diseño o edición (Canva, PowerPoint, Prezzi).
+
+7. Indicadores de desempeño (KPIs)
+1. Ventas y Crecimiento
+- Volumen de ventas: cantidad de software vendido durante un período determinado.
+- Tasa de crecimiento de ventas: compara el crecimiento de las ventas en relación con períodos anteriores.
+- Valor promedio del pedido: valor promedio de los pedidos realizados por los clientes.
+
+2. Eficiencia y Productividad
+- Tiempo de ciclo de ventas: tiempo que tarda en completarse un proceso de venta desde el inicio hasta el final.
+- Tasa de conversión de ventas: compara la cantidad de ventas realizadas con la cantidad de oportunidades de venta identificadas.
+- Número de nuevos clientes adquiridos: cantidad de nuevos clientes obtenidos durante un período determinado.
+
+3. Satisfacción del Cliente y Retención
+- Índice de satisfacción del cliente: mide la satisfacción de los clientes con los productos y servicios de la empresa.
+- Tasa de retención de clientes: porcentaje de clientes que continúan utilizando los productos o servicios de la empresa.
+
+4. Rentabilidad y Eficiencia Financiera
+- Retorno de la inversión (ROI): compara los beneficios obtenidos con la inversión realizada en el sistema ERP.
+- Costo por transacción: costo promedio de procesar una transacción, como un pedido de venta o una factura de proveedor.
+"""
+
+# --- CONEXIÓN A LA BASE DE DATOS ---
+DB_NAME = 'onboarding_mantis.db'
+
+def get_db_connection():
+    """Crea y retorna una conexión a la base de datos."""
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+# --- DATOS INICIALES ---
+# Estos datos ahora pueden ser más simples, ya que el contenido principal está en el documento.
 RAE_LIBRARY_DATA = {
     'RAE1': {
         'stage': 'cultura',
-        'instructional_content': (
-            "**Nuestra Misión y Propósito (RAE1):**\n\n"
-            "El objetivo principal de tu rol es **gestionar y convertir en oportunidades comerciales los contactos que generamos**, contribuyendo directamente al crecimiento de nuestra base de clientes PYMES. No solo vendemos un producto; ofrecemos una solución que transforma negocios.\n\n"
-            "**Aportas valor de múltiples maneras:**\n"
-            "- **Generas nuevas oportunidades:** Eres la primera línea para expandir nuestra cartera de clientes.\n"
-            "- **Fortaleces la marca:** Una buena gestión comercial crea clientes leales y mejora nuestra reputación.\n"
-            "- **Eres la voz del mercado:** La retroalimentación que recoges de los clientes es crucial para que las áreas de producto y soporte mejoren nuestro ERP."
-        ),
-        'description': 'Explica con tus propias palabras, como si se lo contaras a un colega, cuál es el propósito principal de tu rol y de qué manera aportas valor a la organización.',
-        'validation_criteria': {'keywords': ['oportunidades', 'crecimiento', 'pymes', 'clientes', 'reputación', 'retroalimentación']},
-        'remediation_strategy': 'Revisar la sección 2 (Objetivo y Aportes a la Organización) del documento de Gestión del Conocimiento.'
+        'description': 'Explica en 3 frases por qué Mantis FICC existe, basándote en el objetivo y aportes del proceso comercial.',
+        'validation_criteria': ['objetivo', 'aportes', 'crecimiento', 'pymes', 'democratizar'],
+        'remediation_strategy': 'Revisa la sección 2 (Objetivo y Aportes a la Organización) del documento de Gestión del Conocimiento.'
     },
     'RAE2': {
         'stage': 'cultura',
-        'instructional_content': (
-            "**Nuestros Valores en Acción (RAE2):**\n\n"
-            "Más allá de los procesos, nos guiamos por valores que se reflejan en nuestro trabajo diario. Dos de los más importantes son:\n\n"
-            "1. **Cercanía al Cliente:** No se trata solo de vender, sino de **establecer y mantener relaciones sólidas**, asegurando la satisfacción y fidelidad de quienes confían en nosotros. Esto implica escuchar activamente sus necesidades para ofrecer soluciones que realmente les sirvan.\n\n"
-            "2. **Excelencia y Colaboración Técnica:** Tu rol es un puente. Trabajas en **estrecha colaboración con el equipo de desarrollo y producto** para entender a fondo el software. Esta sinergia te permite promocionar el ERP de manera efectiva y comunicar al equipo técnico las necesidades que detectas en el mercado."
-        ),
-        'description': 'Basado en los valores de "Cercanía al Cliente" y "Colaboración Técnica", describe una situación práctica donde aplicarías ambos.',
-        'validation_criteria': {'keywords': ['relaciones', 'satisfacción', 'fidelidad', 'colaboración', 'desarrollo', 'necesidades']},
-        'remediation_strategy': 'Analizar la sección 3 (Alcance) del documento, enfocándote en la interacción con clientes y otros departamentos.'
+        'description': 'Describe cómo tu rol se alinea con al menos dos "Aportes a la Organización" mencionados en el documento.',
+        'validation_criteria': ['fortalecimiento', 'contribución', 'ingresos', 'relación con cliente'],
+        'remediation_strategy': 'Analiza la sección de "Aportes a la Organización" y conecta tus tareas diarias con esos puntos.'
     },
-    'RAE3': {
-        'stage': 'cultura',
-        'instructional_content': (
-            "**Tu Impacto Directo en la Misión (RAE3):**\n\n"
-            "Nuestra misión es **democratizar el acceso a herramientas de gestión para las PYMES**. Tu rol es la pieza clave para que esto suceda.\n\n"
-            "Cada vez que conviertes un lead en un cliente, estás:\n"
-            "- **Aumentando directamente los ingresos** de la compañía a través de un proceso estructurado.\n"
-            "- **Alineando las soluciones del ERP con las necesidades reales** del mercado Pyme.\n\n"
-            "- **Representando estratégicamente nuestro portafolio**, lo que genera la confianza necesaria para que un cliente nos elija."
-        ),
-        'description': 'Explica la conexión entre cerrar una venta y el cumplimiento de la misión general de la empresa. ¿Cómo una acción lleva a la otra?',
-        'validation_criteria': {'keywords': ['ingresos', 'alineando', 'soluciones', 'representando', 'confianza']},
-        'remediation_strategy': 'Revisar la sección "Aportes a la Organización" en el documento de conocimiento.'
-    },
-    'RAE4': {
-        'stage': 'organizacion',
-        'instructional_content': (
-            "**Navegando la Organización: Escalando un Problema Técnico (RAE4):**\n\n"
-            "En tu día a día, te encontrarás con diversas situaciones. Es vital saber a quién acudir. Si un cliente o prospecto presenta una **objeción o duda técnica compleja** que no puedes resolver, el flujo correcto es el siguiente:\n\n"
-            "1. **No intentes adivinar:** Proporcionar información incorrecta puede dañar la confianza.\n"
-            "2. **Canaliza al experto:** Debes escalar la consulta al **Departamento de Desarrollo / Producto**. Ellos tienen el conocimiento profundo para dar una respuesta precisa.\n"
-            "3. **Documenta:** Registra la consulta y la respuesta en GEVI. Esto nos ayuda a construir una base de conocimiento."
-        ),
-        'description': 'Imagina que un cliente te pregunta si nuestro ERP se puede integrar con un sistema de contabilidad muy específico que no conoces. ¿Cuáles serían tus pasos a seguir?',
-        'validation_criteria': {'keywords': ['desarrollo', 'producto', 'técnico', 'soporte', 'escalar', 'preguntar', 'consultar']},
-        'remediation_strategy': 'Estudiar las interacciones con departamentos en la sección 3 (Alcance) y 4 (Entradas) del documento.'
-    },
-    'RAE5': {
-        'stage': 'organizacion',
-        'instructional_content': (
-            "**Flujo de Entrega de un Nuevo Cliente (RAE5):**\n\n"
-            "¡Felicidades, has cerrado una venta! Ahora empieza un proceso crucial: la transición del nuevo cliente al resto de la organización. El flujo es el siguiente:\n\n"
-            "1. **Transición a Administración y Contabilidad (Paso 8):** Inmediatamente después del cierre, debes entregar toda la información del cliente (contrato, propuesta aceptada) al área de **facturación y contable** para que generen la factura y gestionen el pago.\n\n"
-            "2. **Transición a Implementación (Paso 9):** Una vez gestionado lo administrativo, entregas la información al área **técnica o de soporte** para que agenden la instalación, configuración y capacitación del cliente."
-        ),
-        'description': '¿Por qué es importante que el equipo de Administración reciba la información del nuevo cliente antes que el equipo de Implementación? Explica el razonamiento detrás de este orden.',
-        'validation_criteria': {'keywords': ['administrativo', 'contable', 'factura', 'pago', 'primero', 'antes', 'implementación']},
-        'remediation_strategy': 'Revisar los pasos 8 y 9 de la sección 5 (Actividades / Descripción del flujo) del documento.'
-    },
-    'RAE6': {
-        'stage': 'organizacion',
-        'instructional_content': (
-            "**Tus Aliados Clave para el Éxito (RAE6):**\n\n"
-            "Tu éxito no depende solo de tu esfuerzo individual. Hay varios departamentos cuyo trabajo impacta directamente en tus resultados. Tres de los más importantes son:\n\n"
-            "1. **Marketing:** Genera los leads que nutren tu embudo de ventas. Una buena alineación con sus campañas es fundamental.\n"
-            "2. **Implementación / Soporte:** La calidad de su trabajo asegura la satisfacción y retención del cliente que trajiste. Una mala implementación puede arruinar una buena venta.\n\n"
-            "3. **Desarrollo / Producto:** Mejoran y adaptan el software según las necesidades del mercado que tú reportas. Un buen producto es más fácil de vender."
-        ),
-        'description': 'Elige uno de los departamentos mencionados (Marketing, Implementación o Desarrollo) y explica con un ejemplo cómo una falla en su trabajo podría afectar directamente tu capacidad para cerrar una venta.',
-        'validation_criteria': {'keywords': ['marketing', 'implementación', 'soporte', 'desarrollo', 'producto', 'afectar', 'problema', 'falla']},
-        'remediation_strategy': 'Analizar las secciones 3 (Alcance) y 4 (Personas involucradas) del documento de conocimiento.'
-    },
-    'RAE7': {
-        'stage': 'procesos',
-        'instructional_content': (
-            "**El Inicio del Proceso: Recepción y Registro de Leads (RAE7):**\n\n"
-            "Todo comienza con un contacto. Los leads pueden llegar desde múltiples canales: **redes sociales, WhatsApp, página web, referidos, etc.** (Paso 1).\n\n"
-            "Una vez recibido, tu primera tarea es **registrar y segmentar** ese lead (Paso 2). Esto significa:\n"
-            "- Ingresar toda la información de contacto en **GEVI** o la base de datos de Excel.\n"
-            "- Clasificar el lead por criterios clave como **sector, interés manifestado, canal de origen, tamaño de la empresa, etc.** Una buena clasificación nos permite personalizar la comunicación."
-        ),
-        'description': '¿Por qué es importante clasificar un lead por "canal de origen"? ¿Qué tipo de información útil te da ese dato para el proceso de venta?',
-        'validation_criteria': {'keywords': ['registrar', 'segmentar', 'clasificar', 'gevi', 'excel', 'canales', 'origen', 'información']},
-        'remediation_strategy': 'Revisar los pasos 1 y 2 de la sección 5 (Actividades / Descripción del flujo).'
-    },
-    'RAE8': {
-        'stage': 'procesos',
-        'instructional_content': (
-            "**El Diagnóstico: Identificando Información Crítica (RAE8):**\n\n"
-            "Una vez registrado el lead, realizas el **contacto inicial y diagnóstico** (Paso 3). El objetivo de esta llamada o mensaje no es vender, sino **entender**.\n\n"
-            "La información crítica que debes obtener es:\n"
-            "- **Necesidades del cliente:** ¿Qué problema específico quieren resolver?\n"
-            "- **Tipo de empresa:** ¿A qué se dedican, cuántos empleados tienen?\n"
-            "- **Procesos actuales:** ¿Cómo manejan su facturación, inventario, etc., en este momento? ¿Usan otro software, Excel, papel?\n"
-            "- **Motivación de compra:** ¿Por qué están buscando una solución ahora?"
-        ),
-        'description': 'De la información a obtener en el primer contacto, ¿cuál crees que es la más importante para poder personalizar la futura demo del software? Justifica tu respuesta.',
-        'validation_criteria': {'keywords': ['necesidades', 'procesos actuales', 'motivación', 'tipo de empresa', 'diagnóstico', 'personalizar']},
-        'remediation_strategy': 'Estudiar el paso 3 de la sección 5 (Actividades / Descripción del flujo).'
-    },
-    'RAE9': {
-        'stage': 'procesos',
-        'instructional_content': (
-            "**La Entrevista de Descubrimiento (RAE9):**\n\n"
-            "La fase de **'Contacto inicial y diagnóstico' (Paso 3)** es, en esencia, una entrevista de descubrimiento. Es una conversación estructurada para descubrir si podemos ayudar al cliente.\n\n"
-            "**Tus herramientas principales aquí son:**\n"
-            "- **Teléfono y WhatsApp:** Para una comunicación directa y ágil.\n"
-            "- **GEVI:** Para registrar cada interacción y los datos que vas descubriendo.\n\n"
-            "El éxito de todo el proceso de venta depende de la calidad de este diagnóstico. Un buen descubrimiento te permite personalizar la demo y la propuesta comercial más adelante."
-        ),
-        'description': 'Explica con tus palabras por qué un buen diagnóstico inicial es la base para el éxito de toda la venta.',
-        'validation_criteria': {'keywords': ['diagnóstico', 'descubrimiento', 'entender', 'necesidades', 'gevi', 'base', 'éxito']},
-        'remediation_strategy': 'Analizar el paso 3 de la sección 5 (Actividades / Descripción del flujo).'
-    },
-    'RAE10': {
-        'stage': 'procesos',
-        'instructional_content': (
-            "**Identificando los 'Pain Points' (RAE10):**\n\n"
-            "Un 'pain point' o 'punto de dolor' es un problema específico y recurrente que afecta el negocio de un cliente. Tu objetivo en el diagnóstico (Paso 3) es identificar al menos 3 de estos.\n\n"
-            "**Ejemplos de 'pain points' que nuestro ERP puede resolver:**\n"
-            "- 'Perdemos mucho tiempo haciendo facturas a mano.'\n"
-            "- 'No sabemos cuánto inventario tenemos en tiempo real.'\n"
-            "- 'La información de nuestros clientes está desorganizada en varios archivos de Excel.'\n\n"
-            "Identificar estos dolores te permite enfocar tu propuesta en la **solución** y no solo en las características del software."
-        ),
-        'description': 'Imagina un cliente que usa Excel para todo. Basado en los ejemplos, ¿qué posible "pain point" o problema crees que tiene y cómo se lo presentarías?',
-        'validation_criteria': {'keywords': ['dolor', 'problema', 'necesidad', 'solución', 'diagnóstico', 'excel', 'tiempo', 'desorganizado']},
-        'remediation_strategy': 'Reflexionar sobre el objetivo del paso 3 de la sección 5 (Actividades / Descripción del flujo).'
-    },
-    'RAE11': {
-        'stage': 'procesos',
-        'instructional_content': (
-            "**Agendamiento Estratégico de la DEMO (RAE11):**\n\n"
-            "Una vez que has diagnosticado las necesidades del cliente, el siguiente paso es el **agendamiento de la demostración (DEMO)** (Paso 4).\n\n"
-            "**Aspectos clave para un agendamiento exitoso:**\n"
-            "- **Coordinación:** Debes coordinar la fecha y hora no solo con el cliente, sino también con el **equipo técnico o de soporte** que podría apoyarte en la demo.\n"
-            "- **Stakeholders:** Es crucial que en la demo estén presentes las personas que toman las decisiones (dueño, gerente) y quienes usarán el software (contador, jefe de bodega). Si falta alguien clave, la venta se puede estancar.\n"
-            "- **Herramientas:** Utiliza **Google Calendar** para enviar la invitación formal y **WhatsApp/GEVI** para confirmar la asistencia."
-        ),
-        'description': 'Estás agendando una demo y el gerente te dice que él no puede asistir, pero que enviará al contador. ¿Qué riesgo identificas en esta situación y cómo lo manejarías?',
-        'validation_criteria': {'keywords': ['coordinar', 'stakeholders', 'decisores', 'gerente', 'riesgo', 'manejar']},
-        'remediation_strategy': 'Revisar el paso 4 de la sección 5 (Actividades / Descripción del flujo).'
-    },
-    'RAE12': {
-        'stage': 'procesos',
-        'instructional_content': (
-            "**Manejo de Objeciones Post-DEMO (RAE12):**\n\n"
-            "Después de la demostración, es normal que los clientes tengan dudas u objeciones. Tu manejo de esta etapa es crítico.\n\n"
-            "1. **Seguimiento (Paso 5):** Realiza un seguimiento proactivo para consultar la percepción del cliente y resolver dudas iniciales.\n"
-            "2. **Negociación (Paso 7):** Aquí es donde se manejan las objeciones más fuertes, usualmente sobre **precio o condiciones**. Debes estar preparado/a para defender el valor de la solución, negociar dentro de los márgenes permitidos y responder a cualquier inquietud final.\n\n"
-            "Una objeción no es un 'no', es una solicitud de más información. Tu trabajo es proporcionar esa información y reafirmar la confianza."
-        ),
-        'description': 'Un cliente te dice: "Me gustó, pero es muy caro". ¿Cómo aplicarías el principio de "una objeción es una solicitud de más información" en tu respuesta?',
-        'validation_criteria': {'keywords': ['seguimiento', 'negociación', 'objeciones', 'precio', 'caro', 'información', 'valor']},
-        'remediation_strategy': 'Estudiar los pasos 5 and 7 de la sección 5 (Actividades / Descripción del flujo).'
-    },
-    'RAE13': {
-        'stage': 'procesos',
-        'instructional_content': (
-            "**Elaboración de la Propuesta Comercial (RAE13):**\n\n"
-            "Si el interés continúa después de la demo, es hora de formalizar la oferta mediante una **propuesta comercial** (Paso 6).\n\n"
-            "**Componentes de una propuesta técnicamente correcta:**\n"
-            "- **Alcance claro:** Especifica qué módulos del ERP se incluyen.\n"
-            "- **Precios detallados:** Costo de licencia, implementación, soporte, etc.\n"
-            "- **Condiciones de pago:** Plazos y métodos de pago.\n"
-            "- **Soporte y capacitación:** Define qué incluye el servicio post-venta.\n\n"
-            "Utiliza la **plantilla de cotización oficial** y asegúrate de que toda la información sea precisa. Un error aquí puede generar desconfianza o problemas futuros."
-        ),
-        'description': 'Además de los precios, ¿qué otro elemento de la propuesta crees que es CRÍTICO para evitar malentendidos con el cliente en el futuro? Justifica tu elección.',
-        'validation_criteria': {'keywords': ['alcance', 'módulos', 'condiciones', 'soporte', 'malentendidos', 'crítico']},
-        'remediation_strategy': 'Revisar el paso 6 de la sección 5 y la sección 6 (Salidas del proceso) del documento.'
-    },
-    'RAE14': {
-        'stage': 'procesos',
-        'instructional_content': (
-            "**Personalización de la Propuesta (RAE14):**\n\n"
-            "Una propuesta ganadora no es solo una lista de precios. Debe ser un reflejo del diagnóstico que hiciste al principio.\n\n"
-            "**Personalizar la propuesta significa:**\n"
-            "- **Conectar características con soluciones:** En lugar de solo decir 'Módulo de Facturación', explica cómo este módulo resolverá su problema de 'perder tiempo haciendo facturas a mano'.\n"
-            "- **Usar el lenguaje del cliente:** Refleja los 'pain points' que ellos mismos te mencionaron.\n"
-            "- **Enfocar en el ROI:** Destaca cómo la inversión en el ERP se traducirá en ahorros o ganancias para su negocio.\n\n"
-            "La personalización demuestra que escuchaste y entendiste sus necesidades, diferenciándote de la competencia."
-        ),
-        'description': 'Resume en una frase el objetivo principal de "personalizar una propuesta". ¿Qué buscas lograr en la mente del cliente?',
-        'validation_criteria': {'keywords': ['personalizar', 'diagnóstico', 'soluciones', 'pain points', 'necesidades', 'entender', 'escuchar']},
-        'remediation_strategy': 'Reflexionar sobre cómo conectar el paso 3 (Diagnóstico) con el paso 6 (Propuesta).'
-    },
-    'RAE15': {
-        'stage': 'procesos',
-        'instructional_content': (
-            "**La Fase de Negociación y Cierre (RAE15):**\n\n"
-            "Esta es la etapa final para convertir la oportunidad en una venta (Paso 7). La negociación puede involucrar precio, condiciones de pago, o alcance del proyecto.\n\n"
-            "**Principios clave para negociar manteniendo la rentabilidad:**\n"
-            "- **Conoce tus límites:** Debes saber hasta dónde puedes ofrecer un descuento sin afectar la rentabilidad del proyecto. Esto se coordina con Gerencia Comercial.\n"
-            "- **Negocia sobre valor, no sobre precio:** Antes de ceder en el precio, refuerza todo el valor que el cliente obtiene (eficiencia, ahorro de tiempo, mejor toma de decisiones).\n"
-            "- **Busca un ganar-ganar:** Una buena negociación deja a ambas partes sintiendo que han hecho un buen trato.\n\n"
-            "Una vez que la propuesta es aceptada, el cierre se formaliza con la **firma del contrato**."
-        ),
-        'description': 'Explica la diferencia entre "negociar sobre valor" y "negociar sobre precio". ¿Por qué es más efectivo lo primero?',
-        'validation_criteria': {'keywords': ['negociar', 'cierre', 'rentabilidad', 'valor', 'precio', 'diferencia', 'efectivo']},
-        'remediation_strategy': 'Estudiar el paso 7 de la sección 5 (Actividades / Descripción del flujo).'
-    },
-    'RAE16': {
-        'stage': 'procesos',
-        'instructional_content': (
-            "**Identificando Señales de Compra (RAE16):**\n\n"
-            "Durante la negociación y el seguimiento, los clientes emiten 'señales de compra' que indican que están listos para cerrar el trato. Identificarlas te permite saber cuándo presionar para el cierre.\n\n"
-            "**Ejemplos de señales de compra:**\n"
-            "- **Preguntas sobre el futuro:** '¿Cuánto tiempo tomaría la implementación?' o '¿Quién sería nuestro contacto de soporte?'\n"
-            "- **Negociación de detalles menores:** Si discuten sobre una cláusula específica del contrato en lugar del precio general, es una buena señal.\n"
-            "- **Lenguaje posesivo:** Cuando empiezan a hablar del software como 'nuestro sistema' o 'cuando tengamos el ERP'.\n\n"
-            "Al detectar estas señales, puedes hacer una pregunta de cierre como: 'Entonces, ¿procedemos con la firma del contrato esta semana?'"
-        ),
-        'description': 'Además de los ejemplos dados, piensa en otra posible "señal de compra" que un cliente podría dar. ¿Qué te indicaría que está listo para firmar?',
-        'validation_criteria': {'keywords': ['señales', 'compra', 'implementación', 'soporte', 'contrato', 'cierre', 'pregunta', 'indicar']},
-        'remediation_strategy': 'Este es un concepto de ventas estándar aplicado al paso 7 (Negociación y Cierre).'
-    },
-    'RAE17': {
-        'stage': 'procesos',
-        'instructional_content': (
-            "**La Entrega a Equipos Internos (RAE17):**\n\n"
-            "Una 'entrega completa sin pérdida de información' es vital para una buena experiencia del cliente. Esto ocurre en los pasos 8 y 9.\n\n"
-            "**Checklist para una entrega exitosa:**\n"
-            "- **Al equipo Administrativo/Contable (Paso 8):** Debes entregar el contrato firmado, la propuesta final aceptada y los datos de facturación del cliente.\n"
-            "- **Al equipo de Implementación (Paso 9):** Debes entregar un resumen del diagnóstico (necesidades y pain points), el alcance técnico detallado (módulos contratados) y los datos de contacto de los usuarios clave del cliente.\n\n"
-            "La herramienta principal para esta transición es **WhatsApp** para la comunicación rápida y el correo electrónico para el envío formal de documentos."
-        ),
-        'description': '¿Qué podría pasar si omites entregar el "resumen del diagnóstico" al equipo de Implementación? ¿Cuál sería el impacto en el cliente?',
-        'validation_criteria': {'keywords': ['entrega', 'transición', 'implementación', 'diagnóstico', 'impacto', 'problema', 'error']},
-        'remediation_strategy': 'Revisar en detalle los pasos 8 y 9 de la sección 5 (Actividades / Descripción del flujo).'
-    },
-    'RAE18': {
-        'stage': 'procesos',
-        'instructional_content': (
-            "**Coordinando Expectativas Cliente-Implementación (RAE18):**\n\n"
-            "Uno de los mayores riesgos en la post-venta es que el cliente espere algo diferente a lo que el equipo de implementación va a entregar. Tu rol es ser el puente para evitar esto.\n\n"
-            "**¿Cómo se logra?**\n"
-            "En la transición al equipo de implementación (Paso 9), tu responsabilidad es asegurar una **'transmisión clara de los compromisos comerciales y funcionalidades adquiridas'**.\n\n"
-            "Esto puede incluir una breve reunión de 'kick-off' donde participas tú, el cliente y el líder de implementación para repasar el alcance del proyecto y asegurar que todos están en la misma página. Esto gestiona las expectativas y previene malentendidos futuros."
-        ),
-        'description': 'En tus propias palabras, explica el propósito de una reunión de "kick-off" en la transición de un cliente. ¿Qué buscas evitar con ella?',
-        'validation_criteria': {'keywords': ['expectativas', 'alinear', 'transmisión', 'kick-off', 'evitar', 'problemas', 'malentendidos']},
-        'remediation_strategy': 'Analizar el "Alcance" (sección 3) y el paso 9 de la sección 5 (Actividades).'
-    }
+    # ... (otros RAEs pueden ser definidos aquí)
 }
 
 ONBOARDING_PLAN_DATA = [
-    { 'day': 1, 'stage': 'cultura', 'agent': 'CultureGuide', 'title': 'Inmersión Cultural', 'raes': ['RAE1', 'RAE2', 'RAE3'], 'checkpoint': 80 },
-    { 'day': 2, 'stage': 'organizacion', 'agent': 'OrgNavigator', 'title': 'Navegación Organizacional', 'raes': ['RAE4', 'RAE5', 'RAE6'], 'checkpoint': 90 },
-    { 'day': 3, 'stage': 'procesos', 'agent': 'ProcessMaster', 'title': 'Dominio de Procesos (Parte 1)', 'raes': ['RAE7', 'RAE8', 'RAE9', 'RAE10', 'RAE11', 'RAE12'], 'checkpoint': 85 },
-    { 'day': 4, 'stage': 'procesos', 'agent': 'ProcessMaster', 'title': 'Dominio de Procesos (Parte 2)', 'raes': ['RAE13', 'RAE14', 'RAE15', 'RAE16', 'RAE17', 'RAE18'], 'checkpoint': 85 },
-    { 'day': 5, 'stage': 'certificacion', 'agent': 'AssessmentBot', 'title': 'Certificación Integral', 'raes': [], 'checkpoint': 85 },
+    {'stage': 'cultura', 'raes': ['RAE1', 'RAE2'], 'checkpoint': 80},
+    # ... (otras etapas del plan)
 ]
 
+
+# --- FUNCIONES DE LA BASE DE DATOS ---
 def setup_database():
-    """Crea las tablas de la base de datos si no existen y carga los RAEs."""
-    conn = sqlite3.connect(DB_NAME)
+    """Crea las tablas necesarias si no existen."""
+    conn = get_db_connection()
     cursor = conn.cursor()
-
-    # Eliminar tablas si existen para aplicar cambios de esquema
-    cursor.execute("DROP TABLE IF EXISTS user_progress")
-    cursor.execute("DROP TABLE IF EXISTS rae_library")
-
-    # Crear tabla user_progress
-    cursor.execute("""
-    CREATE TABLE user_progress (
-        user_id TEXT PRIMARY KEY,
-        user_name TEXT,
-        current_stage TEXT,
-        current_rae_id TEXT,
-        rae_scores JSON,
-        time_spent INTEGER,
-        attempts_per_rae JSON,
-        identified_gaps JSON,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-
-    # Crear tabla rae_library
-    cursor.execute("""
-    CREATE TABLE rae_library (
-        rae_id TEXT PRIMARY KEY,
-        stage TEXT,
-        instructional_content TEXT,
-        description TEXT,
-        validation_criteria JSON,
-        remediation_strategy TEXT
-    )
-    """)
-
-    # Poblar rae_library
-    for rae_id, data in RAE_LIBRARY_DATA.items():
-        cursor.execute("""
-        INSERT INTO rae_library (rae_id, stage, instructional_content, description, validation_criteria, remediation_strategy)
-        VALUES (?, ?, ?, ?, ?, ?)
-        """, (rae_id, data['stage'], data.get('instructional_content', ''), data['description'], json.dumps(data['validation_criteria']), data['remediation_strategy']))
-
+    
+    # Tabla de progreso de usuarios
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_progress (
+            user_id TEXT PRIMARY KEY,
+            user_name TEXT,
+            current_stage TEXT,
+            current_rae_id TEXT,
+            rae_scores TEXT, -- JSON con el estado y puntaje de cada RAE
+            completed BOOLEAN DEFAULT FALSE
+        )
+    ''')
+    
     conn.commit()
     conn.close()
-    print("Base de datos configurada exitosamente.")
 
 class ProgressTracker:
-    """Maneja la lógica de seguimiento del progreso del usuario."""
-    def __init__(self, db_name=DB_NAME):
-        self.db_name = db_name
-
-    def get_connection(self):
-        return sqlite3.connect(self.db_name)
-
+    """Clase para manejar el progreso del usuario en la base de datos."""
+    
     def get_user_progress(self, user_id):
-        """Recupera el progreso de un usuario."""
-        conn = self.get_connection()
+        """Obtiene el progreso de un usuario."""
+        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM user_progress WHERE user_id = ?", (user_id,))
-        row = cursor.fetchone()
+        progress = cursor.fetchone()
         conn.close()
-        if row:
-            # Convertir la tupla a un diccionario
-            columns = [desc[0] for desc in cursor.description]
-            progress_data = dict(zip(columns, row))
-
-            # Deserializar campos JSON
-            if 'rae_scores' in progress_data and progress_data['rae_scores']:
-                progress_data['rae_scores'] = json.loads(progress_data['rae_scores'])
-            if 'attempts_per_rae' in progress_data and progress_data['attempts_per_rae']:
-                progress_data['attempts_per_rae'] = json.loads(progress_data['attempts_per_rae'])
-            if 'identified_gaps' in progress_data and progress_data['identified_gaps']:
-                progress_data['identified_gaps'] = json.loads(progress_data['identified_gaps'])
-
-            return progress_data
+        if progress:
+            # Deserializar rae_scores de JSON a un diccionario
+            progress_dict = dict(progress)
+            progress_dict['rae_scores'] = json.loads(progress_dict['rae_scores']) if progress_dict['rae_scores'] else {}
+            return progress_dict
         return None
 
     def create_new_user(self, user_id, user_name):
-        """Inicializa el progreso para un nuevo usuario."""
-        conn = self.get_connection()
+        """Crea un nuevo registro de progreso para un usuario."""
+        conn = get_db_connection()
         cursor = conn.cursor()
         
-        initial_rae_scores = {rae_id: {"status": "pendiente", "score": 0} for rae_id in RAE_LIBRARY_DATA.keys()}
-        initial_attempts = {rae_id: 0 for rae_id in RAE_LIBRARY_DATA.keys()}
-        
-        # Obtener el primer RAE del plan de onboarding
-        first_stage_raes = ONBOARDING_PLAN_DATA[0]['raes']
-        initial_current_rae_id = first_stage_raes[0] if first_stage_raes else None
+        initial_rae_scores = {rae_id: {'status': 'pendiente', 'score': 0} for rae_id in RAE_LIBRARY_DATA.keys()}
+        initial_stage = ONBOARDING_PLAN_DATA[0]['stage']
+        initial_rae_id = ONBOARDING_PLAN_DATA[0]['raes'][0]
 
-        cursor.execute("""
-        INSERT INTO user_progress (user_id, user_name, current_stage, current_rae_id, rae_scores, time_spent, attempts_per_rae, identified_gaps)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (user_id, user_name, 'cultura', initial_current_rae_id, json.dumps(initial_rae_scores), 0, json.dumps(initial_attempts), json.dumps([])))
+        cursor.execute('''
+            INSERT INTO user_progress (user_id, user_name, current_stage, current_rae_id, rae_scores, completed)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (user_id, user_name, initial_stage, initial_rae_id, json.dumps(initial_rae_scores), False))
         
         conn.commit()
         conn.close()
-        print(f"Nuevo usuario '{user_id}' creado.")
         return self.get_user_progress(user_id)
 
     def update_user_progress(self, user_id, updates):
         """Actualiza el progreso de un usuario con un diccionario de cambios."""
-        conn = self.get_connection()
+        conn = get_db_connection()
         cursor = conn.cursor()
-
+        
         # Construir la consulta de actualización dinámicamente
         set_clause = ", ".join([f"{key} = ?" for key in updates.keys()])
         values = list(updates.values())
         values.append(user_id)
-
-        query = f"UPDATE user_progress SET {set_clause} WHERE user_id = ?"
         
-        cursor.execute(query, values)
+        query = f"UPDATE user_progress SET {set_clause} WHERE user_id = ?"
+        cursor.execute(query, tuple(values))
         
         conn.commit()
         conn.close()
-        print(f"Progreso del usuario '{user_id}' actualizado.")
 
+# --- Bloque de prueba ---
 if __name__ == '__main__':
-    # Este bloque se ejecuta solo cuando se corre el script directamente
-    # Es útil para la configuración inicial
+    print("Configurando la base de datos...")
     setup_database()
+    print("Base de datos lista.")
     
-    # Ejemplo de cómo usar el ProgressTracker
-    tracker = ProgressTracker()
-    user_id = 'ejecutiva_pymes_01'
+    print("\nContenido del Documento de Conocimiento:")
+    print(KNOWLEDGE_DOCUMENT_CONTENT[:500] + "...") # Imprimir un fragmento
     
-    progress = tracker.get_user_progress(user_id)
-    if not progress:
-        progress = tracker.create_new_user(user_id)
-    
-    print("\nEjemplo de datos de progreso:")
-    print(json.dumps(progress, indent=2))
-
-    # Ejemplo de actualización
-    updates = {
-        "time_spent": 120,
-        "current_stage": "organizacion"
-    }
-    tracker.update_user_progress(user_id, updates)
-    
-    updated_progress = tracker.get_user_progress(user_id)
-    print("\nEjemplo de datos de progreso actualizados:")
-    print(json.dumps(updated_progress, indent=2))
+    print("\nRAE Library Data:")
+    print(json.dumps(RAE_LIBRARY_DATA, indent=2))
