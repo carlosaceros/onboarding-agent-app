@@ -127,13 +127,27 @@ def process_user_input(user_prompt, tracker, assessment_bot, culture_guide, org_
     current_rae_id = current_progress.get('current_rae_id')
     rae_info = RAE_LIBRARY_DATA.get(current_rae_id)
 
-    # --- Detección de intención para activar el modo instruccional ---
+    # --- Detección de intenciones globales ---
     instructional_keywords = ["primer paso", "explícame el onboarding", "dame el contenido", "modo instruccional"]
+    drive_keywords = ["recursos", "material de drive", "ayuda", "documento"]
+
     if any(keyword in user_prompt.lower() for keyword in instructional_keywords) and not st.session_state.instructional_mode_active:
         st.session_state.instructional_mode_active = True
         st.session_state.current_instruction_index = 0
         st.session_state.rae_sub_stage = 'teaching' # Reiniciar a teaching para empezar la secuencia
         return "¡Excelente! Comenzaremos con el modo instruccional. Te guiaré paso a paso por el contenido de cada etapa. Cuando estés listo para el siguiente bloque, solo dímelo."
+
+    if any(keyword in user_prompt.lower() for keyword in drive_keywords):
+        with st.spinner("Buscando en Google Drive..."):
+            resource_name = "Plantilla_Gestion_Conocimiento"
+            found_files = drive_service.search_files(resource_name, folder_id=ONBOARDING_FOLDER_ID)
+            st.session_state.found_files = found_files
+        
+        if not found_files:
+            return "No pude encontrar el documento 'Plantilla_Gestion_Conocimiento' en la carpeta de onboarding de Google Drive."
+        
+        file_links = "\n".join([f"- [{file_item['name']}]({file_item['webViewLink']})" for file_item in found_files])
+        return f"¡Claro! Encontré los siguientes documentos para ti:\n{file_links}\n\nPuedes hacer clic en ellos para abrirlos."
 
     # --- Lógica para el modo instruccional ---
     if st.session_state.instructional_mode_active:
