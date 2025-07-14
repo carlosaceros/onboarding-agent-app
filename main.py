@@ -149,12 +149,15 @@ def process_user_input(user_prompt, tracker, assessment_bot, culture_guide, org_
                 current_rae_to_teach_id = stage_raes[st.session_state.current_instruction_index]
                 rae_to_teach_info = RAE_LIBRARY_DATA.get(current_rae_to_teach_id)
                 if rae_to_teach_info:
-                    instructional_content = rae_to_teach_info.get('instructional_content', 'No hay contenido de enseñanza para este objetivo.')
+                    # Usar el agente para extraer el contenido dinámicamente
+                    with st.spinner("Preparando el siguiente tema..."):
+                        instructional_content = culture_guide.get_instructional_snippet(KNOWLEDGE_DOCUMENT_CONTENT, rae_to_teach_info)
+                    
                     response_text = f'''**Contenido para {rae_to_teach_info['stage'].capitalize()} - {current_rae_to_teach_id}:**
 
 {instructional_content}
 
-Cuando estés listo/a para el siguiente bloque de información, dímelo.'''
+Cuando estés listo/a para el siguiente bloque de información, dímelo. También puedes hacerme cualquier pregunta sobre el material.'''
                     st.session_state.rae_sub_stage = 'waiting_for_next_instruction'
                     return response_text
                 else:
@@ -164,53 +167,44 @@ Cuando estés listo/a para el siguiente bloque de información, dímelo.'''
                 # Todos los RAEs de la etapa actual han sido presentados
                 st.session_state.instructional_mode_active = False
                 st.session_state.rae_sub_stage = 'stage_evaluation_ready'
-                return f"¡Hemos cubierto todo el contenido de la etapa de **{current_stage.capitalize()}**! Ahora es momento de evaluar tu comprensión de esta etapa. ¿Estás listo/a para las preguntas?"
+                return f"¡Hemos cubierto todo el contenido de la etapa de **{current_stage.capitalize()}**! Ahora es momento de evaluar tu comprensión. ¿Estás listo/a para las preguntas?"
 
         elif st.session_state.rae_sub_stage == 'waiting_for_next_instruction':
             affirmative_responses = ['sí', 'si', 'listo', 'lista', 'dale', 'ok', 'vale', 'adelante', 'siguiente', 'continuar']
             if any(word in user_prompt.lower() for word in affirmative_responses):
                 st.session_state.current_instruction_index += 1
-                st.session_state.rae_sub_stage = 'teaching' # Volver a teaching para presentar el siguiente bloque
-                return process_user_input("", tracker, assessment_bot, culture_guide, org_navigator, process_master, drive_service) # Llamada recursiva para presentar el siguiente RAE
+                st.session_state.rae_sub_stage = 'teaching'
+                return process_user_input("", tracker, assessment_bot, culture_guide, org_navigator, process_master, drive_service)
             else:
-                # Si no es una respuesta afirmativa, intentar responder la pregunta sobre el contenido del RAE actual
-                current_rae_to_teach_id = stage_raes[st.session_state.current_instruction_index -1] # -1 porque ya se incrementó en teaching
-                rae_to_teach_info = RAE_LIBRARY_DATA.get(current_rae_to_teach_id)
-                if rae_to_teach_info:
-                    instructional_content = rae_to_teach_info.get('instructional_content', '')
-                    ai_response_to_question = culture_guide.answer_question_about_content(instructional_content, user_prompt)
-                    response_text = f'''{ai_response_to_question}
+                # Si no es una respuesta afirmativa, responder usando el documento completo
+                ai_response_to_question = culture_guide.answer_question_about_content(KNOWLEDGE_DOCUMENT_CONTENT, user_prompt)
+                response_text = f'''{ai_response_to_question}
 
-¿Hay algo más en este bloque que te gustaría que te aclare, {user_name}? O, ¿estás listo/a para el siguiente?'''
-                    return response_text
-                else:
-                    return "No pude encontrar el contenido para aclarar tu pregunta. Por favor, dime si estás listo/a para el siguiente bloque."
+¿Hay algo más que te gustaría que te aclare, {user_name}? O, ¿estás listo/a para el siguiente bloque de contenido?'''
+                return response_text
         
         elif st.session_state.rae_sub_stage == 'stage_evaluation_ready':
             affirmative_responses = ['sí', 'si', 'listo', 'lista', 'dale', 'ok', 'vale', 'adelante', 'comencemos']
             if any(word in user_prompt.lower() for word in affirmative_responses):
-                # Aquí se iniciaría la evaluación de la etapa. Por ahora, volvemos al flujo normal del primer RAE de la etapa.
-                # Esto necesitará una lógica más sofisticada para la evaluación de etapa.
-                st.session_state.rae_sub_stage = 'assessing' # O un nuevo estado como 'evaluating_stage'
-                st.session_state.current_instruction_index = 0 # Resetear para la evaluación
-                # Forzar el inicio de la evaluación del primer RAE de la etapa
+                st.session_state.rae_sub_stage = 'assessing'
+                st.session_state.current_instruction_index = 0
                 current_rae_id = stage_raes[0]
                 rae_info = RAE_LIBRARY_DATA.get(current_rae_id)
-                # Corrigiendo indentación y añadiendo un comentario para que Git detecte cambios.
                 response_text = f'''¡Perfecto! Aquí va la primera pregunta de la etapa de {current_stage.capitalize()}:
 
 > **{rae_info['description']}**'''
                 return response_text
             else:
-                return f"No hay problema, {user_name}. Avísame cuando estés listo/a para comenzar la evaluación de la etapa de {current_stage.capitalize()}." # Corregido f-string y añadido comentario.
+                return f"No hay problema, {user_name}. Avísame cuando estés listo/a para comenzar la evaluación de la etapa de {current_stage.capitalize()}."
 
     # --- Lógica original para cuando el modo instruccional NO está activo ---
     if not rae_info:
         return "Error: No se encontró información para el RAE actual."
 
     if st.session_state.rae_sub_stage == 'teaching':
-        instructional_content = rae_info.get('instructional_content', 'No hay contenido de enseñanza para este objetivo.')
-        response_text = f"{instructional_content}\n\nHe compartido contigo la información clave. Avísame cuando estés listo/a para la pregunta." # Corregido f-string y añadido comentario.
+        with st.spinner("Preparando el material de estudio..."):
+            instructional_content = culture_guide.get_instructional_snippet(KNOWLEDGE_DOCUMENT_CONTENT, rae_info)
+        response_text = f"{instructional_content}\n\nHe compartido contigo la información clave. Avísame cuando estés listo/a para la pregunta."
         st.session_state.rae_sub_stage = 'waiting_for_confirmation'
         return response_text
 

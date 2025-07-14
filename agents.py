@@ -84,6 +84,41 @@ class CultureGuide(BaseAgent):
         Si el empleado falla un RAE, proporciona retroalimentación específica y re-enseña el concepto.
         """
 
+    def get_instructional_snippet(self, full_document_content, rae_info):
+        """Extrae un fragmento relevante del documento de conocimiento para un RAE específico."""
+        keywords = rae_info.get('document_section_keywords', [])
+        if not keywords:
+            return "No hay un contenido de enseñanza específico para este objetivo. Puedes hacerme preguntas sobre el material de onboarding si tienes dudas."
+
+        prompt = f"""
+        **TAREA DE EXTRACCIÓN DE CONTENIDO IA**
+
+        **Contexto:** Eres un asistente de IA que prepara material de estudio para un nuevo empleado. Tu tarea es extraer la sección más relevante de un documento extenso para un objetivo de aprendizaje (RAE) específico.
+
+        **Documento Completo:**
+        ---
+        {full_document_content}
+        ---
+
+        **Objetivo de Aprendizaje (RAE):**
+        - **Descripción:** {rae_info['description']}
+        - **Palabras Clave de la Sección:** {', '.join(keywords)}
+
+        **Instrucción:**
+        1.  Lee la descripción del RAE y las palabras clave.
+        2.  Busca en el "Documento Completo" la sección o los párrafos que mejor expliquen los conceptos relacionados con el RAE.
+        3.  Extrae y presenta **solo** ese fragmento de texto de manera limpia y concisa. No añadas introducciones ni conclusiones. Simplemente devuelve el texto relevante.
+        
+        **Ejemplo de Salida (si las palabras clave fueran "Indicadores de Desempeño", "KPIs"):**
+        7. Indicadores de desempeño (KPIs)
+        1. Ventas y Crecimiento
+        ✓ Volumen de ventas: cantidad de software vendido durante un período determinado.
+        ... (y el resto de esa sección)
+
+        **Fragmento Extraído:**
+        """
+        return self.generate_response(prompt)
+
     def get_full_commercial_process(self):
         """Devuelve una explicación completa del proceso comercial basada en el documento PDF."""
         explanation = """
