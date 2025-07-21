@@ -179,7 +179,6 @@ Cuando estés listo/a para el siguiente bloque de información, dímelo. Tambié
                     return "No se encontró contenido para este RAE. Pasando al siguiente..."
             else:
                 # Todos los RAEs de la etapa actual han sido presentados
-                st.session_state.instructional_mode_active = False
                 st.session_state.rae_sub_stage = 'stage_evaluation_ready'
                 return f"¡Hemos cubierto todo el contenido de la etapa de **{current_stage.capitalize()}**! Ahora es momento de evaluar tu comprensión. ¿Estás listo/a para las preguntas?"
 
