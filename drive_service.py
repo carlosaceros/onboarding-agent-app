@@ -63,11 +63,15 @@ class DriveService:
                 with open('google_credentials/credentials.json', 'r') as f:
                     client_config = json.load(f)['installed'] # Assuming 'installed' type
             else:
-                print(f"Error: No se encuentra el archivo de credenciales en 'google_credentials/credentials.json' ni en st.secrets.")
+                st.error("Error: No se encuentra el archivo de credenciales en 'google_credentials/credentials.json' ni en st.secrets.")
                 return None
         
         flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-        creds = flow.run_local_server(port=0)
+        try:
+            creds = flow.run_local_server(port=0)
+        except Exception as e:
+            st.error(f"Error durante la autenticación: {e}. Si estás en Streamlit Cloud, asegúrate de que el secret 'google_token' esté actualizado.")
+            creds = None
         return creds
 
     def search_files(self, query, folder_id=None, page_size=5):
