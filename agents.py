@@ -273,27 +273,31 @@ class AssessmentBot(BaseAgent):
             return False # No content to evaluate
 
         validation_prompt = f"""
-        **TAREA DE EVALUACIÓN DE IA**
+        **TAREA DE EVALUACIÓN DE IA - ALTA PRECISIÓN**
 
-        **Contexto:** Estás evaluando la respuesta de un nuevo empleado a un objetivo de aprendizaje (RAE). La respuesta puede ser texto o el contenido de un archivo.
-        
-        **Agente Evaluador:** AssessmentBot
-        
+        **Contexto:** Eres un evaluador de IA extremadamente riguroso. Tu tarea es validar la respuesta de un nuevo empleado contra un objetivo de aprendizaje (RAE), siguiendo reglas estrictas.
+
         **RAE a Evaluar:** {rae_id}
         **Descripción del RAE:** "{rae_info['description']}"
-        **Criterios de Validación (basado en palabras clave):** {json.dumps(rae_info['validation_criteria'])}
+        
+        **Criterios de Validación Estrictos:**
+        - **OBLIGATORIO (Debe Contener):** {json.dumps(rae_info['validation_criteria'].get('must_have', []))}
+        - **DESEABLE (Debería Contener):** {json.dumps(rae_info['validation_criteria'].get('should_have', []))}
 
-        **Respuesta del Empleado (texto o contenido de archivo):**
-        --- 
+        **Respuesta del Empleado:**
+        ---
         {content_to_evaluate}
         ---
 
-        **Instrucción:**
-        Analiza la respuesta del empleado. ¿Cumple con la esencia de la descripción del RAE y los criterios de validación? 
+        **Instrucciones de Evaluación:**
+        1.  **Verificación Obligatoria:** Primero, comprueba si la respuesta del empleado contiene **TODAS** las palabras o conceptos del criterio "OBLIGATORIO". Si falta **incluso uno solo** de estos elementos, la respuesta es un **FALLIDO** inmediato, sin importar qué más contenga.
+        2.  **Verificación Deseable:** Si y solo si se cumplen todos los criterios obligatorios, procede a verificar cuántos de los conceptos "DESEABLES" están presentes.
+        3.  **Decisión Final:**
+            - Si no se cumplen todos los criterios OBLIGATORIOS, responde **FALLIDO**.
+            - Si se cumplen todos los criterios OBLIGATORIOS y al menos la mitad de los DESEABLES, responde **APROBADO**.
+            - Si se cumplen los OBLIGATORIOS pero no los DESEABLES suficientes, responde **FALLIDO**.
+
         Responde con una única palabra: **APROBADO** o **FALLIDO**.
-        
-        **Ejemplo de Respuesta Esperada:**
-        APROBADO
         """
         
         result = self.generate_response(validation_prompt).upper()

@@ -139,7 +139,10 @@ RAE_LIBRARY_DATA = {
     'RAE1': {
         'stage': 'cultura',
         'description': 'Explica en 3 frases por qué Mantis FICC existe, basándote en el objetivo y aportes del proceso comercial.',
-        'validation_criteria': ['objetivo', 'aportes', 'crecimiento', 'pymes', 'democratizar'],
+        'validation_criteria': {
+            'must_have': ['democratizar', 'pymes'],
+            'should_have': ['objetivo', 'aportes', 'crecimiento']
+        },
         'remediation_strategy': 'Revisa la sección 2 (Objetivo y Aportes a la Organización) del documento de Gestión del Conocimiento.',
         'document_section_keywords': ['Objetivo', 'Aportes a la Organizacion', 'misión']
     },
