@@ -149,7 +149,10 @@ RAE_LIBRARY_DATA = {
     'RAE2': {
         'stage': 'cultura',
         'description': 'Describe cómo tu rol se alinea con al menos dos "Aportes a la Organización" mencionados en el documento.',
-        'validation_criteria': ['fortalecimiento', 'contribución', 'ingresos', 'relación con cliente'],
+        'validation_criteria': {
+            'must_have': ['rol', 'aportes'],
+            'should_have': ['contribución', 'ingresos', 'fortalecimiento', 'relación con cliente']
+        },
         'remediation_strategy': 'Analiza la sección de "Aportes a la Organización" y conecta tus tareas diarias con esos puntos.',
         'document_section_keywords': ['Aportes a la Organizacion', 'rol', 'contribución', 'Fortalecimiento de la relación']
     },
